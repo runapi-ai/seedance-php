@@ -43,12 +43,43 @@ final class SeedanceClientTest extends TestCase
             'model' => 'seedance-2-mini',
             'prompt' => 'A compact cinematic scene',
             'reference_video_urls' => ['https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4'],
-            'reference_audio_urls' => ['https://cdn.runapi.ai/public/samples/audio.mp3'],
+            'reference_audio_urls' => ['https://cdn.runapi.ai/public/samples/music.mp3'],
             'output_resolution' => '720p',
             'aspect_ratio' => 'auto',
             'duration_seconds' => 8,
             'generate_audio' => false,
         ])->id);
+    }
+
+    public function testTextToVideoAcceptsSeedance2Generated4k(): void
+    {
+        $transport = new QueueHttpClient([new Response(200, [], '{"id":"task_4k"}')]);
+        $client = new SeedanceClient(new ClientOptions(apiKey: 'k', httpClient: $transport, maxRetries: 0));
+
+        self::assertSame('task_4k', $client->textToVideo->create([
+            'model' => 'seedance-2.0',
+            'prompt' => 'A cinematic city flyover',
+            'output_resolution' => '4k',
+        ])->id);
+
+        $body = json_decode((string) $transport->requests[0]->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        self::assertSame('4k', $body['output_resolution']);
+    }
+
+    public function testTextToVideoRejectsSeedance2Frame4k(): void
+    {
+        $transport = new QueueHttpClient([]);
+        $client = new SeedanceClient(new ClientOptions(apiKey: 'k', httpClient: $transport, maxRetries: 0));
+
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessage('first_frame_image_url is not allowed when model is seedance-2.0 and output_resolution is 4k');
+
+        $client->textToVideo->create([
+            'model' => 'seedance-2.0',
+            'prompt' => 'A cinematic city flyover',
+            'output_resolution' => '4k',
+            'first_frame_image_url' => 'https://file.runapi.ai/first.png',
+        ]);
     }
 
     public function testTextToVideoRunReturnsTypedCompletedResponse(): void
