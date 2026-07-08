@@ -14,6 +14,7 @@ final class Types
         'seedance-1.5-pro',
         'seedance-2.0',
         'seedance-2.0-fast',
+        'seedance-2-mini',
         'seedance-v1-lite',
         'seedance-v1-pro',
         'seedance-v1-pro-fast',

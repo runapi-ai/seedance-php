@@ -34,6 +34,23 @@ final class SeedanceClientTest extends TestCase
         self::assertSame('/api/v1/seedance/text_to_video', $transport->requests[0]->getUri()->getPath());
     }
 
+    public function testTextToVideoCreateMini(): void
+    {
+        $transport = new QueueHttpClient([new Response(200, [], '{"id":"task_mini"}')]);
+        $client = new SeedanceClient(new ClientOptions(apiKey: 'k', httpClient: $transport, maxRetries: 0));
+
+        self::assertSame('task_mini', $client->textToVideo->create([
+            'model' => 'seedance-2-mini',
+            'prompt' => 'A compact cinematic scene',
+            'reference_video_urls' => ['https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4'],
+            'reference_audio_urls' => ['https://cdn.runapi.ai/public/samples/audio.mp3'],
+            'output_resolution' => '720p',
+            'aspect_ratio' => 'auto',
+            'duration_seconds' => 8,
+            'generate_audio' => false,
+        ])->id);
+    }
+
     public function testTextToVideoRunReturnsTypedCompletedResponse(): void
     {
         $transport = new QueueHttpClient([
@@ -56,12 +73,12 @@ final class SeedanceClientTest extends TestCase
         $client = new SeedanceClient(new ClientOptions(apiKey: 'k', httpClient: new QueueHttpClient([]), maxRetries: 0));
 
         $this->expectException(ValidationException::class);
-        $this->expectExceptionMessage('duration_seconds must be one of the allowed values');
+        $this->expectExceptionMessage('duration_seconds must be greater than or equal to 4');
 
         $client->textToVideo->create([
             'model' => 'seedance-1.5-pro',
             'prompt' => 'test',
-            'duration_seconds' => 5,
+            'duration_seconds' => 3,
         ]);
     }
 }
