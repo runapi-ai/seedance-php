@@ -20,7 +20,8 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "RunApi\\Seedance\\Tests\\": "tests/"
+      "RunApi\\Seedance\\Tests\\": "tests/",
+      "RunApi\\Core\\Tests\\": "tests/Support/CoreTests/"
     }
   },
   "extra": {
@@ -45,5 +46,11 @@
     "packagist",
     "seedance",
     "seedance-api"
-  ]
+  ],
+  "require-dev": {
+    "phpunit/phpunit": "^11.5"
+  },
+  "scripts": {
+    "test": "phpunit -c phpunit.xml.dist"
+  }
 }
