@@ -51,6 +51,40 @@ final class SeedanceClientTest extends TestCase
         ])->id);
     }
 
+    public function testTextToVideoSendsSeedForSeedance15Pro(): void
+    {
+        $transport = new QueueHttpClient([new Response(200, [], '{"id":"task_15_seed"}')]);
+        $client = new SeedanceClient(new ClientOptions(apiKey: 'k', httpClient: $transport, maxRetries: 0));
+
+        $client->textToVideo->create([
+            'model' => 'seedance-1.5-pro',
+            'prompt' => 'A serene lake at dawn',
+            'aspect_ratio' => '16:9',
+            'duration_seconds' => 4,
+            'seed' => 42,
+        ]);
+
+        $body = json_decode((string) $transport->requests[0]->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        self::assertSame(42, $body['seed']);
+    }
+
+    public function testTextToVideoSendsSeedForV1ProFast(): void
+    {
+        $transport = new QueueHttpClient([new Response(200, [], '{"id":"task_fast_seed"}')]);
+        $client = new SeedanceClient(new ClientOptions(apiKey: 'k', httpClient: $transport, maxRetries: 0));
+
+        $client->textToVideo->create([
+            'model' => 'seedance-v1-pro-fast',
+            'prompt' => 'Animate the frame quickly',
+            'first_frame_image_url' => 'https://cdn.runapi.ai/public/samples/image.jpg',
+            'duration_seconds' => 5,
+            'seed' => 42,
+        ]);
+
+        $body = json_decode((string) $transport->requests[0]->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        self::assertSame(42, $body['seed']);
+    }
+
     public function testTextToVideoAcceptsSeedance2Generated4k(): void
     {
         $transport = new QueueHttpClient([new Response(200, [], '{"id":"task_4k"}')]);

@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.1.3](https://github.com/runapi-ai/seedance-php/releases/tag/v0.1.3) - 2026-07-21
+
+### Added
+- Add optional `seed` support for Seedance 1.5 Pro and V1 Pro Fast requests with integer range validation.
+
+
 ## [v0.1.2](https://github.com/runapi-ai/seedance-php/releases/tag/v0.1.2) - 2026-07-08
 
 ### Changed
