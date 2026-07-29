@@ -46,8 +46,8 @@ All SDK exceptions inherit from `RunApi\Core\Errors\RunApiException`, including 
 ## Links
 
 - Model page: https://runapi.ai/models/seedance
-- SDK docs: https://runapi.ai/docs#sdk-seedance
-- Product docs: https://runapi.ai/docs#seedance
+- SDK docs: https://runapi.ai/docs/resources/sdks
+- Product docs: https://runapi.ai/docs/api/seedance/text-to-video
 - Pricing and rate limits: https://runapi.ai/models/seedance/v1-lite
 - Full catalog: https://runapi.ai/models
 - GitHub repository: https://github.com/runapi-ai/seedance-php

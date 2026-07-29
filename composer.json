@@ -33,7 +33,7 @@
   "homepage": "https://runapi.ai/models/seedance",
   "support": {
     "source": "https://github.com/runapi-ai/seedance-php",
-    "docs": "https://runapi.ai/docs#sdk-seedance",
+    "docs": "https://runapi.ai/docs/resources/sdks",
     "issues": "https://github.com/runapi-ai/seedance-php/issues"
   },
   "keywords": [
