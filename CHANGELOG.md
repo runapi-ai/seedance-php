@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.1.5](https://github.com/runapi-ai/seedance-php/releases/tag/v0.1.5) - 2026-07-31
+
+### Removed
+- Remove seedance-v1-lite from the supported Seedance model list.
+  Migration: Use seedance-v1-pro or another supported Seedance model.
+
+
 ## [v0.1.4](https://github.com/runapi-ai/seedance-php/releases/tag/v0.1.4) - 2026-07-29
 
 ### Removed
