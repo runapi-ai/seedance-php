@@ -51,6 +51,26 @@ final class SeedanceClientTest extends TestCase
         ])->id);
     }
 
+    public function testTextToVideoCreateSeedance25(): void
+    {
+        $transport = new QueueHttpClient([new Response(200, [], '{"id":"task_25"}')]);
+        $client = new SeedanceClient(new ClientOptions(apiKey: 'k', httpClient: $transport, maxRetries: 0));
+
+        self::assertSame('task_25', $client->textToVideo->create([
+            'model' => 'seedance-2.5',
+            'prompt' => 'Match the reference media',
+            'reference_image_urls' => ['https://cdn.runapi.ai/public/samples/reference.jpg'],
+            'reference_video_urls' => ['https://cdn.runapi.ai/public/samples/reference.mp4'],
+            'duration_seconds' => -1,
+            'return_last_frame' => true,
+            'output_format' => 'mov',
+        ])->id);
+
+        $body = json_decode((string) $transport->requests[0]->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        self::assertTrue($body['return_last_frame']);
+        self::assertSame('mov', $body['output_format']);
+    }
+
     public function testTextToVideoSendsSeedForSeedance15Pro(): void
     {
         $transport = new QueueHttpClient([new Response(200, [], '{"id":"task_15_seed"}')]);

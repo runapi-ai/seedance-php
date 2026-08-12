@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.1.6](https://github.com/runapi-ai/seedance-php/releases/tag/v0.1.6) - 2026-08-12
+
+### Added
+- Add Seedance 2.5 request fields and model validation to the PHP package.
+
+
 ## [v0.1.5](https://github.com/runapi-ai/seedance-php/releases/tag/v0.1.5) - 2026-07-31
 
 ### Removed
