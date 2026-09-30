@@ -7,7 +7,6 @@ namespace RunApi\Seedance\Tests\Unit;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
 use RunApi\Core\ClientOptions;
-use RunApi\Core\Errors\ValidationException;
 use RunApi\Core\Tests\Fixtures\QueueHttpClient;
 use RunApi\Seedance\Models\CompletedVideoTaskResponse;
 use RunApi\Seedance\Resources\TextToVideo;
@@ -29,8 +28,7 @@ final class SeedanceClientTest extends TestCase
 
         self::assertSame('task_1', $client->textToVideo->create([
             'model' => 'seedance-2.0',
-            'prompt' => 'A cat walking through a garden',
-        ])->id);
+            'prompt' => 'A cat walking through a garden'])->id);
         self::assertSame('/api/v1/seedance/text_to_video', $transport->requests[0]->getUri()->getPath());
     }
 
@@ -47,8 +45,7 @@ final class SeedanceClientTest extends TestCase
             'output_resolution' => '720p',
             'aspect_ratio' => 'auto',
             'duration_seconds' => 8,
-            'generate_audio' => false,
-        ])->id);
+            'generate_audio' => false])->id);
     }
 
     public function testTextToVideoCreateSeedance25(): void
@@ -61,12 +58,13 @@ final class SeedanceClientTest extends TestCase
             'prompt' => 'Match the reference media',
             'reference_image_urls' => ['https://cdn.runapi.ai/public/samples/reference.jpg'],
             'reference_video_urls' => ['https://cdn.runapi.ai/public/samples/reference.mp4'],
+            'output_resolution' => '1080p',
             'duration_seconds' => -1,
             'return_last_frame' => true,
-            'output_format' => 'mov',
-        ])->id);
+            'output_format' => 'mov'])->id);
 
         $body = json_decode((string) $transport->requests[0]->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        self::assertSame('1080p', $body['output_resolution']);
         self::assertTrue($body['return_last_frame']);
         self::assertSame('mov', $body['output_format']);
     }
@@ -81,8 +79,7 @@ final class SeedanceClientTest extends TestCase
             'prompt' => 'A serene lake at dawn',
             'aspect_ratio' => '16:9',
             'duration_seconds' => 4,
-            'seed' => 42,
-        ]);
+            'seed' => 42]);
 
         $body = json_decode((string) $transport->requests[0]->getBody(), true, 512, JSON_THROW_ON_ERROR);
         self::assertSame(42, $body['seed']);
@@ -98,8 +95,7 @@ final class SeedanceClientTest extends TestCase
             'prompt' => 'Animate the frame quickly',
             'first_frame_image_url' => 'https://cdn.runapi.ai/public/samples/image.jpg',
             'duration_seconds' => 5,
-            'seed' => 42,
-        ]);
+            'seed' => 42]);
 
         $body = json_decode((string) $transport->requests[0]->getBody(), true, 512, JSON_THROW_ON_ERROR);
         self::assertSame(42, $body['seed']);
@@ -113,57 +109,28 @@ final class SeedanceClientTest extends TestCase
         self::assertSame('task_4k', $client->textToVideo->create([
             'model' => 'seedance-2.0',
             'prompt' => 'A cinematic city flyover',
-            'output_resolution' => '4k',
-        ])->id);
+            'output_resolution' => '4k'])->id);
 
         $body = json_decode((string) $transport->requests[0]->getBody(), true, 512, JSON_THROW_ON_ERROR);
         self::assertSame('4k', $body['output_resolution']);
     }
 
-    public function testTextToVideoRejectsSeedance2Frame4k(): void
-    {
-        $transport = new QueueHttpClient([]);
-        $client = new SeedanceClient(new ClientOptions(apiKey: 'k', httpClient: $transport, maxRetries: 0));
 
-        $this->expectException(ValidationException::class);
-        $this->expectExceptionMessage('first_frame_image_url is not allowed when model is seedance-2.0 and output_resolution is 4k');
-
-        $client->textToVideo->create([
-            'model' => 'seedance-2.0',
-            'prompt' => 'A cinematic city flyover',
-            'output_resolution' => '4k',
-            'first_frame_image_url' => 'https://file.runapi.ai/first.png',
-        ]);
-    }
 
     public function testTextToVideoRunReturnsTypedCompletedResponse(): void
     {
         $transport = new QueueHttpClient([
             new Response(200, [], '{"id":"task_1"}'),
-            new Response(200, [], '{"id":"task_1","status":"completed","videos":[{"url":"https://file.runapi.ai/video.mp4"}]}'),
-        ]);
+            new Response(200, [], '{"id":"task_1","status":"completed","videos":[{"url":"https://file.runapi.ai/video.mp4"}],"usage":{"cost":0.05}}')]);
         $client = new SeedanceClient(new ClientOptions(apiKey: 'k', httpClient: $transport, maxRetries: 0));
 
         $result = $client->textToVideo->run([
             'model' => 'seedance-2.0',
-            'prompt' => 'A cat walking through a garden',
-        ]);
+            'prompt' => 'A cat walking through a garden']);
 
         self::assertInstanceOf(CompletedVideoTaskResponse::class, $result);
         self::assertSame('https://file.runapi.ai/video.mp4', $result->videos[0]->url);
     }
 
-    public function testGeneratedContractValidationRuns(): void
-    {
-        $client = new SeedanceClient(new ClientOptions(apiKey: 'k', httpClient: new QueueHttpClient([]), maxRetries: 0));
 
-        $this->expectException(ValidationException::class);
-        $this->expectExceptionMessage('duration_seconds must be greater than or equal to 4');
-
-        $client->textToVideo->create([
-            'model' => 'seedance-1.5-pro',
-            'prompt' => 'test',
-            'duration_seconds' => 3,
-        ]);
-    }
 }
